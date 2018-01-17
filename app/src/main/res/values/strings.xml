@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">KotlinDashboard</string>
+
+    <string name="score_top_row">Your credit score is</string>
+    <string name="score_bottom_row">out of 700</string>
+
+</resources>

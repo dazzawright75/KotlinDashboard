@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="scoreTextColor">#F4D17D</color>
+
+    <color name="pageColor">#F2F2F2</color>
+
+
+    <color name="start">#ffff00</color>
+    <color name="end">#455a64</color>
+    <color name="centre">#ff5722</color>
+</resources>
