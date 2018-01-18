@@ -3,7 +3,7 @@ package com.bintonet.android.kotlindashboard
 import com.bintonet.android.kotlindashboard.model.Dashboard
 
 /**
- * Created by darren.w.wright on 17/01/2018.
+ * This is the contract that defines the View & Presenter
  */
 interface MainContract{
     interface MvpView{
@@ -17,7 +17,7 @@ interface MainContract{
         fun onfetchDataError(t: Throwable)
     }
     interface Presenter{
-        fun loadData()
+        fun fetchData()
     }
 
 }

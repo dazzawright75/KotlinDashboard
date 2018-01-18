@@ -15,7 +15,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import com.bintonet.android.kotlindashboard.R
 
 /**
- * CustomView for drawing the score in the form of a progress ring
+ * CustomView for drawing the circle for the score
  */
 
 class ProgressCircle(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -23,68 +23,60 @@ class ProgressCircle(context: Context, attrs: AttributeSet) : View(context, attr
     private val mOval = RectF()
     private var mSweepAngle = 0f
     private val startAngle = 90
+    private var mEndAngle = 1.0f
 
-    internal var mEndAngle = 1.0f
+    private var shaderCx: Float = 0.toFloat()
+    private var shaderCy: Float = 0.toFloat()
+    private var shaderColor0 = Color.YELLOW
+    private var shaderColor1 = Color.RED
 
-    internal var shaderCx: Float = 0.toFloat()
-    internal var shaderCy: Float = 0.toFloat()
-    internal var shaderColor0 = Color.YELLOW
-    internal var shaderColor1 = Color.RED
-
-    internal var progressPaint = Paint()
-
-    internal var incompletePaint = Paint()
+    private var progressPaint = Paint()
 
     private var strokeWidth = 4.0f
 
     init {
 
+        // here we load any custom attrs set in the layout xml
         val a = context.theme.obtainStyledAttributes(
                 attrs,
                 R.styleable.ProgressCircle,
                 0, 0)
 
-        val incompleteColor: Int
-
         try {
-
-            strokeWidth = a.getDimension(R.styleable.ProgressCircle_strokeWidth, 15.0f)
-            incompleteColor = a.getColor(R.styleable.ProgressCircle_incompleteProgressColor, -0x1000000)
+            //we store them here as variables for use later
+            strokeWidth = a.getDimension(R.styleable.ProgressCircle_strokeWidth, 4.0f)
         } finally {
             a.recycle()
         }
 
+        // building the paint object for the circle
         progressPaint.strokeWidth = strokeWidth
         progressPaint.style = Paint.Style.STROKE
         progressPaint.flags = Paint.ANTI_ALIAS_FLAG
         progressPaint.shader = SweepGradient(shaderCx, shaderCy, shaderColor0, shaderColor1)
-
-        incompletePaint.color = incompleteColor
-        incompletePaint.strokeWidth = strokeWidth
-        incompletePaint.style = Paint.Style.STROKE
-        incompletePaint.flags = Paint.ANTI_ALIAS_FLAG
 
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        val w: Float
-        val h: Float
+        // set some dimensions for the circle (width and height of the canvas)
+        val w: Float = width.toFloat()
+        val h: Float = height.toFloat()
 
-        w = width.toFloat()
-        h = height.toFloat()
+        //these are used for the colour gradient
         shaderCx = w / 2
         shaderCy = h / 2
 
+        //now we set the Rectf coordinates
         mOval.set(strokeWidth / 2, strokeWidth / 2, w - strokeWidth / 2, w - strokeWidth / 2)
-        canvas.drawArc(mOval, (-startAngle).toFloat(), mSweepAngle * 360, false,
-                progressPaint)
 
-        mOval.set(strokeWidth / 2, strokeWidth / 2, w - strokeWidth / 2, w - strokeWidth / 2)
-        canvas.drawArc(mOval, mSweepAngle * 360 - startAngle, 360 - mSweepAngle * 360, false,
-                incompletePaint)
-
+        //draw the circle now
+        // startAngle : I am not sure why but 0 is at the right of the screen, so 270 is starting at the top
+        // sweepangle, how far round we want the arc to go
+        // usecenter, do we want the arc to go to the centre of the circle, if yes then the result would look like a pie chart
+        // finally the paint we want to use, in our case the progress paint we defined earlier
+        canvas.drawArc(mOval, 270F, mSweepAngle * 360, false, progressPaint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -92,23 +84,25 @@ class ProgressCircle(context: Context, attrs: AttributeSet) : View(context, attr
     }
 
 
+    // function we call from the mainview to set how far round the arc should go
     fun setProgress(progress: Float) {
         if (progress > 1.0f || progress < 0) {
             throw RuntimeException("Value must be between 0 and 1: " + progress)
         }
-
         mEndAngle = progress
 
         this.invalidate()
     }
 
+    // simple animation function to be called after we set the progress to redraw the arc
+    //  but have it draw over a set amount of time
     fun startAnimation() {
         val anim = ValueAnimator.ofFloat(mSweepAngle, mEndAngle)
         anim.addUpdateListener { valueAnimator ->
             this@ProgressCircle.mSweepAngle = valueAnimator.animatedValue as Float
             this@ProgressCircle.invalidate()
         }
-        anim.duration = 500
+        anim.duration = 300
         anim.interpolator = AccelerateDecelerateInterpolator()
         anim.start()
 
