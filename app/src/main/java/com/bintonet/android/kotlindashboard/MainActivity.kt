@@ -2,6 +2,7 @@ package com.bintonet.android.kotlindashboard
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 
 import com.bintonet.android.kotlindashboard.customviews.ProgressCircle
@@ -39,7 +40,7 @@ class MainActivity : AppCompatActivity(), MainContract.MvpView {
 
     override fun onfetchDataError(t: Throwable) {}
 
-    fun setScoreTextValue(score : Int){
+    fun setScoreTextValue(score: Int?){
         scoreTextView!!.text = score.toString()
     }
 
@@ -60,11 +61,31 @@ class MainActivity : AppCompatActivity(), MainContract.MvpView {
         scoreTextView = findViewById(R.id.tv_score) as TextView
 
 
+
     }
 
     override fun onResume() {
         super.onResume()
-        mainPresenter?.fetchData()
+        when (mainPresenter?.getReportsCountFromLocalDb(this)) {
+
+            0 ->{
+                Log.i("MainActivity", "No data found")
+                mainPresenter?.fetchDataFromApi(this)
+            }
+            else -> {
+                Log.i("MainActivity", "We have local data already")
+                val report = mainPresenter?.getALlReportsLocalDb(this)?.get(0)
+                Log.i("MainActivity", report.toString())
+                setScoreTextValue(report?.score)
+                if (report != null) {
+                    val score = report.score
+                    if (score != null) {
+                        setProgressCircleValue(score)
+                    }
+                }
+                mainPresenter?.fetchDataFromApi(this)
+            }
+        }
     }
 
     private var mainPresenter: MainPresenter? = null
