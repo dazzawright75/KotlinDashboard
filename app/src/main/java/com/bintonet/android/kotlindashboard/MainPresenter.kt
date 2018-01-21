@@ -16,6 +16,7 @@ import retrofit2.Response
  * MainPresenter is the 'presenter' portion of my MVP architecture
  * Handles actions from the View and updates the UI as needed.
  */
+
 class MainPresenter internal constructor(private val mView: MainContract.MvpView?) : MainContract.Presenter {
     private val api: DashboardApi = DashboardRestApi()
 
@@ -61,12 +62,13 @@ class MainPresenter internal constructor(private val mView: MainContract.MvpView
                                 // and let the main view know the operation was a success and send it some data
                                 // in this case our Dashboard object
                                 // Also from here it could be stored in sqlite
-                                mView?.onFetchDataSuccess(dashboard)
+
                                 val score = dashboard.creditReportInfo?.score
                                 val clientRef = dashboard.creditReportInfo?.clientRef
                                 val report = Report(score, clientRef)
                                 Log.i("Presenter", report.toString())
                                 updateReportLocalDb(context, report)
+                                mView?.onFetchDataSuccess(report)
                             }
 
                         } else {
@@ -85,5 +87,12 @@ class MainPresenter internal constructor(private val mView: MainContract.MvpView
                         mView?.onfetchDataError(t)
                     }
                 })
+    }
+
+    fun fetchDataFromLocalDb(context: Context) {
+
+        val report = getALlReportsLocalDb(context)?.get(0)
+        mView?.onFetchDataSuccess(report)
+
     }
 }

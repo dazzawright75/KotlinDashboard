@@ -22,6 +22,7 @@ android {
     }
     testOptions {
         unitTests {
+            unitTests.returnDefaultValues = true
             includeAndroidResources = true
         }
     }
@@ -44,7 +45,9 @@ dependencies {
 
     testCompile 'org.mockito:mockito-core:2.10.0'
     testCompile 'com.squareup.retrofit2:retrofit-mock:2.3.0'
-    testCompile 'org.amshove.kluent:kluent:1.30'
+
     testCompile 'org.robolectric:robolectric:3.4.2'
+
+    androidTestCompile 'org.mockito:mockito-android:2.10.0'
 
 }
