@@ -2,27 +2,33 @@ package com.bintonet.android.kotlindashboard
 
 import android.content.Context
 import android.util.Log
-import com.bintonet.android.kotlindashboard.api.DashboardApi
-import com.bintonet.android.kotlindashboard.api.DashboardRestApi
 import com.bintonet.android.kotlindashboard.model.Dashboard
 import com.bintonet.android.kotlindashboard.model.local.ReportDbHelper
 import com.bintonet.android.kotlindashboard.model.local.Report
 
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import rx.Subscriber
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
+import rx.Scheduler
+
 
 /**
  * MainPresenter is the 'presenter' portion of my MVP architecture
  * Handles actions from the View and updates the UI as needed.
  */
 
-class MainPresenter internal constructor(private val mView: MainContract.MvpView?) : MainContract.Presenter {
-    private val api: DashboardApi = DashboardRestApi()
+class MainPresenter internal constructor(private var mView: MainContract.MvpView?,
+                                         var dashboardDataSource: DashboardDataSource?,
+                                         private var backgroundScheduler: Scheduler?,
+                                         private var mainScheduler: Scheduler?
+
+                                         ) : MainContract.Presenter {
+
+    val LOG_TAG = MainPresenter::class.java.simpleName
 
     lateinit var reportDbHelper: ReportDbHelper
 
-    override fun addToLocalDb(report : Report, context: Context){
+    override fun addToLocalDb(report: Report, context: Context) {
         reportDbHelper = ReportDbHelper(context)
         reportDbHelper.insertReport(report)
     }
@@ -32,9 +38,9 @@ class MainPresenter internal constructor(private val mView: MainContract.MvpView
         return reportDbHelper.getAllReport()
     }
 
-    override fun getReportsCountFromLocalDb(context: Context): Int {
+    override fun getReportsCountFromLocalDb(context: Context): Int? {
         reportDbHelper = ReportDbHelper(context)
-        return reportDbHelper.getAllReport().size
+        return reportDbHelper.getAllReport()?.size
     }
 
     override fun updateReportLocalDb(context: Context, report: Report): Int {
@@ -44,55 +50,50 @@ class MainPresenter internal constructor(private val mView: MainContract.MvpView
 
     // this is the main call for fetching the json from the api and converting into model objects
     // I use Retrofit for api calls as it (for me) is an easier and quicker method for making asyndc api calls
-    override fun fetchDataFromApi(context: Context) {
+    override fun fetchDataFromApi(context: Context, isNew: Boolean) {
 
-        // notify the mainview that we have started retrieving data
-        // maybe show a spinner to the user
         mView?.onFetchDataStarted()
-        api.getDashboardValues()
-                .enqueue(object : Callback<Dashboard> {
-                    override fun onResponse(call: Call<Dashboard>, response: Response<Dashboard>) {
-                        //at this point we have a response from the api, so we notify the mainview
-                        //can stop showing any spinners for example
+
+        DashboardRemoteDataSource().dashboardValues
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Subscriber<Dashboard>() {
+                    override fun onCompleted() {
+                        Log.i(LOG_TAG, " >> onCompleted")
                         mView?.onfetchDataCompleted()
-                        if (response.isSuccessful) {
-                            //the response is reporting it was a success, so we can go ahead and get the data
-                            val dashboard = response.body()
-                            if (dashboard != null) {
-                                // and let the main view know the operation was a success and send it some data
-                                // in this case our Dashboard object
-                                // Also from here it could be stored in sqlite
-
-                                val score = dashboard.creditReportInfo?.score
-                                val clientRef = dashboard.creditReportInfo?.clientRef
-                                val report = Report(score, clientRef)
-                                Log.i("Presenter", report.toString())
-                                updateReportLocalDb(context, report)
-                                mView?.onFetchDataSuccess(report)
-                            }
-
-                        } else {
-                            //the response wasn't successful, so we can notify the main view anyway
-                            //so any spinners etc can be stopped
-                            //would also normally send back the response message maybe, or at least log it
-                            mView?.onfetchDataCompleted()
-                        }
                     }
 
-                    override fun onFailure(call: Call<Dashboard>, t: Throwable) {
-                        //the response failed completely and we have an exception
-                        // that we can update the main view with
-                        //maybe display a toast
-                        //and stop and spinners
-                        mView?.onfetchDataError(t)
+                    override fun onError(e: Throwable) {
+                        Log.i(LOG_TAG, " >> onError")
+                        mView?.onfetchDataError(e)
+                    }
+
+                    override fun onNext(dashboard: Dashboard) {
+                        val score = dashboard.creditReportInfo?.score
+                        val clientRef = dashboard.creditReportInfo?.clientRef
+                        val report = Report(score, clientRef)
+                        if (isNew) {
+                            addToLocalDb(report, context)
+                        } else {
+                            updateReportLocalDb(context, report)
+                        }
+
+                        mView?.onFetchDataSuccess(report)
                     }
                 })
     }
 
-    fun fetchDataFromLocalDb(context: Context) {
-
-        val report = getALlReportsLocalDb(context)?.get(0)
-        mView?.onFetchDataSuccess(report)
-
+    override fun fetchData(context: Context) {
+        Log.i(LOG_TAG, "fetchDataFromLocalDb")
+        val reportsList = getALlReportsLocalDb(context)
+        if (reportsList != null) {
+            Log.i(LOG_TAG, "We have some local data")
+            mView?.onFetchDataSuccess(reportsList[0])
+            fetchDataFromApi(context, false)
+        } else {
+            Log.i(LOG_TAG, "Nothing in the local DB")
+            fetchDataFromApi(context, true)
+        }
     }
+
 }

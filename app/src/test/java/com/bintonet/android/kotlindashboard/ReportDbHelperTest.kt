@@ -15,17 +15,16 @@ import org.robolectric.annotation.Config
  * Test class for the local SQLite DB
  * I am using Roboelectric for this since it allowd easy access to context, which is needed for DB interactions
  */
-@RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class, sdk = [21],
-        packageName = "com.bintonet.android.kotlindashboard")
-class ReportDbHelperTest {
+
+class ReportDbHelperTest  : BaseTest() {
 
     lateinit var reportDbHelper: ReportDbHelper
 
     @Before
     fun setup() {
-        reportDbHelper = ReportDbHelper(RuntimeEnvironment.application)
-        reportDbHelper.clearDbAndRecreate() // This is just to clear the db so we know what is there
+        reportDbHelper = ReportDbHelper(context())
+        reportDbHelper.clearDb() // This is just to clear the db so we know what is there
+
     }
 
     /*
@@ -45,9 +44,9 @@ class ReportDbHelperTest {
         reportDbHelper.insertReport(report)
 
         // Then
-        assertEquals(reportDbHelper.getAllReport().size, 1)
-        assertEquals(reportDbHelper.getAllReport().get(0).score, test_score)
-        assertEquals(reportDbHelper.getAllReport().get(0).clientRef, test_client_ref)
+        assertEquals(reportDbHelper.getAllReport()?.size, 1)
+        assertEquals(reportDbHelper.getAllReport()?.get(0)?.score, test_score)
+        assertEquals(reportDbHelper.getAllReport()?.get(0)?.clientRef, test_client_ref)
 
     }
 
@@ -68,9 +67,9 @@ class ReportDbHelperTest {
         reportDbHelper.insertReport(report)
 
         // Then
-        assertEquals(reportDbHelper.getAllReport().size, 1)
-        assertEquals(reportDbHelper.getAllReport().get(0).score, testScore)
-        assertEquals(reportDbHelper.getAllReport().get(0).clientRef, testClientRef)
+        assertEquals(reportDbHelper.getAllReport()?.size, 1)
+        assertEquals(reportDbHelper.getAllReport()?.get(0)?.score, testScore)
+        assertEquals(reportDbHelper.getAllReport()?.get(0)?.clientRef, testClientRef)
 
         // Given
         val testScore2 = 321
@@ -79,9 +78,9 @@ class ReportDbHelperTest {
         reportDbHelper.updateReport(report2)
 
         // Then
-        assertEquals(reportDbHelper.getAllReport().size, 1)
-        assertEquals(reportDbHelper.getAllReport().get(0).score, testScore2)
-        assertEquals(reportDbHelper.getAllReport().get(0).clientRef, testClientRef)
+        assertEquals(reportDbHelper.getAllReport()?.size, 1)
+        assertEquals(reportDbHelper.getAllReport()?.get(0)?.score, testScore2)
+        assertEquals(reportDbHelper.getAllReport()?.get(0)?.clientRef, testClientRef)
 
 
     }

@@ -14,11 +14,12 @@ interface MainContract{
         fun onfetchDataError(t: Throwable)
     }
     interface Presenter{
-        fun fetchDataFromApi(context: Context)
-        fun getReportsCountFromLocalDb(context: Context): Int
+        fun getReportsCountFromLocalDb(context: Context): Int?
         fun getALlReportsLocalDb(context: Context): List<Report>?
         fun addToLocalDb(report: Report, context: Context)
         fun updateReportLocalDb(context: Context, report: Report): Int
+        fun fetchDataFromApi(context: Context, isNew: Boolean)
+        fun fetchData(context: Context)
     }
 
 }

@@ -4,12 +4,11 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
 
 /**
- * Created by darren.w.wright on 19/01/2018.
+ * Helper class for the SQLite DB.
  */
-class ReportDbHelper(context: Context) : SQLiteOpenHelper(context, ReportDbHelper.DATABASE_NAME, null, ReportDbHelper.DATABASE_VERSION) {
+class ReportDbHelper(context: Context) : SQLiteOpenHelper(context, ReportDbHelper.DATABASE_NAME, null, ReportDbHelper.DATABASE_VERSION)  {
 
     companion object {
         val KEY_SCORE = "score"
@@ -61,7 +60,7 @@ class ReportDbHelper(context: Context) : SQLiteOpenHelper(context, ReportDbHelpe
      * READ
      */
 
-    fun getAllReport(): ArrayList<Report> {
+    fun getAllReport(): ArrayList<Report>? {
         val reportList = arrayListOf<Report>()
 
         val cursor = writableDatabase.query(ReportDbHelper.DATABASE_TABLE, ReportDbHelper.RESULT_COLUMNS,
@@ -76,7 +75,12 @@ class ReportDbHelper(context: Context) : SQLiteOpenHelper(context, ReportDbHelpe
 
         cursor.close()
 
-        return reportList
+        if(reportList.size > 0) {
+            return reportList
+        }else{
+            return null
+        }
+
     }
 
     /**
