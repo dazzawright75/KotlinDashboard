@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity(), MainContract.MvpView {
 
         val score = report?.score
 
-        // and then set the progress circle value aswell
+        // and then set the progress circle value
         if (score != null) {
             setScoreTextValue(score)
             setProgressCircleValue(score)

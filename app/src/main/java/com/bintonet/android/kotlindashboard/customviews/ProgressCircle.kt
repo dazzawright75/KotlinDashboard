@@ -2,7 +2,6 @@ package com.bintonet.android.kotlindashboard.customviews
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.content.res.TypedArray
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -22,7 +21,6 @@ class ProgressCircle(context: Context, attrs: AttributeSet) : View(context, attr
 
     private val mOval = RectF()
     private var mSweepAngle = 0f
-    private val startAngle = 90
     private var mEndAngle = 1.0f
 
     private var shaderCx: Float = 0.toFloat()
