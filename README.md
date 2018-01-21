@@ -2,7 +2,8 @@
 
 Simple dashboard application to draw circular progress bar on screen using data from a given endpoint.
 
-I kept the implementation simple and used a minimal SQLuie DB containing only the data needed for this. IN reality it would have a lot more.
+I kept the implementation simple and used a minimal SQLite DB containing only the data needed for this.
+In reality it would have a lot more, and i would nprobably use a library such as Realm.
 
 ## Built With
 
