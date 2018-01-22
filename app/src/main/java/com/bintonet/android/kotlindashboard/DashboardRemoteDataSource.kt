@@ -11,7 +11,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import rx.Observable
 
 /**
- * Created by Darren Wright on 3/1/17.
+ * Class to setup the Retrofit object
+ *
  */
 
 class DashboardRemoteDataSource : DashboardDataSource {
