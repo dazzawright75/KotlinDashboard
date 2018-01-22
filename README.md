@@ -8,6 +8,7 @@ In reality it would have a lot more, and i would nprobably use a library such as
 ## Built With
 
 * [Retrofit](http://square.github.io/retrofit/) - For making async API calls.
+* [RxJava](https://github.com/ReactiveX/RxJava) - Reactivex for Java. This is a new one for me, I hadnt used it before so I don't think I have used it to its full potential. It did link in with retrofit nicely though.
 
 ## Testing
 

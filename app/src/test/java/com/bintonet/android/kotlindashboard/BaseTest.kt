@@ -17,7 +17,7 @@ import java.io.File
  */
 
 @RunWith(RobolectricTestRunner::class)
-@Config(constants = BuildConfig::class, sdk = [21],
+@Config(constants = BuildConfig::class,
         application = BaseTest.ApplicationStub::class,
         packageName = "com.bintonet.android.kotlindashboard")
 abstract class BaseTest {
